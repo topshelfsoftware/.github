@@ -8,16 +8,8 @@ These guidelines were inspired by
 
 ## Table of Contents
 
-- [Cloning the Repository](#cloning-the-repository)
 - [Reporting Issues](#reporting-issues)
 - [Development Practices](#development-practices)
-
---------------
-
-## Cloning the Repository
-
-The source repository can be cloned from
-<https://github.com/trpubins/Gifter>
 
 --------------
 
