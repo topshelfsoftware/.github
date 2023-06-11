@@ -22,16 +22,16 @@ related to this repository.
 
 If any bugs, crashes, or concerning quirks are discovered while
 using code distributed here, report it on the [issues
-page](https://github.com/trpubins/Gifter/issues) with an appropriate
+page](https://github.com/topshelfsoftware/.github/issues) with an appropriate
 label so it can be promptly addressed. When reporting an issue, be
-overly descriptive so that it may be reproduced. Whenever possible,
+overly descriptive so that the behavior may be reproduced. Whenever possible,
 provide tracebacks, screenshots, and sample files.
 
 ### Feature Requests
 
 Users are encouraged to submit ideas for improvements to the code
 base. Create an issue on the [issues
-page](https://github.com/trpubins/Gifter/issues) with a
+page](https://github.com/topshelfsoftware/.github/issues) with a
 *feature-request* label to suggest an improvement. Use a descriptive
 title and provide ample background information to help the developers
 implement that functionality. The issue thread will be used as a place
@@ -83,14 +83,14 @@ changes any given branch is introducing before looking at the code.
 ### Testing
 
 Test changes locally before creating a pull request. Additionally,
-add new unit tests as new funcitonality is added. Any existing
+add new unit tests as new functionality is added. Any existing
 unit tests will be executed after all pull requests.
 
 ### Creating a New Pull Request
 
 Once a branch has been tested locally, merge into `main` by creating
-a new [pull request](https://github.com/trpubins/Gifter/pulls). Provide
-a succinct title and summarize a description of the changes.
+a new pull request. Provide a succinct title and summarize a description
+of the changes.
 
 **ALWAYS** "Squash and Merge" when merging into `main` to ensure its
 stability at every commit.
