@@ -1,0 +1,54 @@
+name: Create Release
+
+on:
+  workflow_call:
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # need to clone the full repository history to generate release notes
+
+      - name: Read version from VERSION file
+        id: read_version
+        run: |
+          version=$(cat VERSION)
+          echo "version=${version}" >> $GITHUB_ENV
+
+      - name: Get previous tag
+        id: get_previous_tag
+        run: |
+          previous_tag=$(git describe --tags --abbrev=0 HEAD^)
+          echo "previous_tag=${previous_tag}" >> $GITHUB_ENV
+
+      - name: Generate release notes
+        id: generate_notes
+        run: |
+          # Fetch commit messages between the latest and previous tags (without commit hashes) and add "* " to each line
+          notes=$(git log ${{ env.previous_tag }}..HEAD --oneline | cut -d ' ' -f2- | sed 's/^/* /')
+
+          # Get repo URL from Git config
+          repo_url=$(git config --get remote.origin.url)
+
+          # Format the release notes body as a multiline string
+          release_notes="## What's Changed\n${notes}\n\n**Full Changelog**: ${repo_url}/compare/${{ env.previous_tag }}...${{ env.version }}"
+
+          # Write the release notes to the GITHUB_ENV file
+          echo "body<<EOF" >> $GITHUB_ENV
+          echo -e "$release_notes" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ env.version }}
+          release_name: ${{ env.version }}
+          body: ${{ env.body }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

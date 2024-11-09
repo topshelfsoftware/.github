@@ -57,7 +57,7 @@ The primary features of this branching model are:
   patches, and other branches should be merged here. Ideally, this
   branch is functionally stable at every commit.
 - There may be one or simultaneously many active branches at any given
-  time. Branches should pass all applicable tests before being merged
+  time. Branches should pass all applicable status checks before being merged
   into `main` as changes might introduce unintended side-effects or bugs.
 
 ### Branch Naming Conventions
@@ -67,24 +67,22 @@ branches. These requirements help the core developers know what kind of
 changes any given branch is introducing before looking at the code.
 
 - `fix/`: any bug fixes, patches, or experimental changes that are
-   minor
+   small (PATCH version increment expected)
 - `feat/`: any changes that introduce a new feature or significant
-   addition
-- `junk/`: for any experimental changes that can be deleted if gone
-   stale
-- `maint/`: for general maintenance of the repository or CI routines
+   addition (MINOR version increment expected)
+- `breaking-change/`: changes that break backward compatibility
+   (MAJOR version increment expected)
+- `maint/`: for general maintenance of the repository
 - `doc/`: for any changes only pertaining to documentation
-- `no-ci/`: for low impact activity that should NOT trigger the CI
-   routines
+- `cicd/`: activity related to the CI/CD workflows
 - `testing/`: improvements or changes to testing
 - `release/`: changes related to a software release or tag
-- `breaking-change/`: changes that break backward compatibility
 
 ### Testing
 
 Test changes locally before creating a pull request. Additionally,
-add new unit tests as new functionality is added. Any existing
-unit tests will be executed after all pull requests.
+add new unit tests as new functionality is added. Linting and all
+unit tests will be executed after a pull request is opened.
 
 ### Creating a New Pull Request
 
@@ -92,5 +90,6 @@ Once a branch has been tested locally, merge into `main` by creating
 a new pull request. Provide a succinct title and summarize a description
 of the changes.
 
-**ALWAYS** "Squash and Merge" when merging into `main` to ensure its
-stability at every commit.
+**ALWAYS** "Squash and Merge" when merging into `main`. This creates
+a concise commit history, where the commit messages are abbreviated
+summaries of the changes in each PR.
