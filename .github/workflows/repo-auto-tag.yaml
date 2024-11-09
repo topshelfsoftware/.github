@@ -1,0 +1,35 @@
+name: Tag Repository
+
+on:
+  workflow_call:
+
+jobs:
+  tag-repo:
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Read version from VERSION file
+        id: read_version
+        run: |
+          version=$(cat VERSION)
+          echo "version=${version}" >> $GITHUB_ENV
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          git tag -l | xargs -n 1 git tag -d && git fetch --tags  # clear local tags and fetch only remote tags
+          if git rev-parse ${{ env.version }} >/dev/null 2>&1; then
+            echo "Tag ${{ env.version }} already exists."
+            exit 1
+          fi
+
+      - name: Tag and Push
+        if: success()
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git tag ${{ env.version }}
+          git push origin ${{ env.version }} --no-verify  # skip pre-commit hooks
