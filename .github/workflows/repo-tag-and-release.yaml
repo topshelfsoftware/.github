@@ -60,20 +60,47 @@ jobs:
       - name: Get previous tag
         id: get_previous_tag
         run: |
-          previous_tag=$(git describe --tags --abbrev=0 HEAD^)
+          # Assign empty string if no previous tag is found
+          previous_tag=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
           echo "previous_tag=${previous_tag}" >> $GITHUB_ENV
 
-      - name: Generate release notes
+          if [ -z "$previous_tag" ]; then
+            echo "No previous tag found. This is the first tag and release."
+          else
+            echo "Found previous tag: $previous_tag"
+          fi
+
+      - name: Generate release notes and determine prerelease flag
         id: generate_notes
         run: |
-          # Fetch commit messages between the latest and previous tags (without commit hashes) and add "* " to each line
-          notes=$(git log ${{ env.previous_tag }}..HEAD --oneline | cut -d ' ' -f2- | sed 's/^/* /')
-
           # Get repo URL from Git config
           repo_url=$(git config --get remote.origin.url)
 
+          # Determine commit message range for notes
+          if [ -z "${{ env.previous_tag }}" ] || [[ "${{ env.version }}" =~ ^([a-zA-Z])?1\.0\.0.* ]]; then
+            notes=$(git log --oneline | cut -d ' ' -f2- | sed 's/^/* /')
+          else
+            notes=$(git log ${{ env.previous_tag }}..HEAD --oneline | cut -d ' ' -f2- | sed 's/^/* /')
+          fi
+
           # Format the release notes body as a multiline string
-          release_notes="## What's Changed\n${notes}\n\n**Full Changelog**: ${repo_url}/compare/${{ env.previous_tag }}...${{ env.version }}"
+          # Also, determine the prerelease flag
+          if [[ "${{ env.version }}" =~ ^([a-zA-Z])?0\..* ]]; then
+            release_notes="## Pre-Release\n${notes}"
+            prerelease=true
+          elif [[ "${{ env.version }}" =~ ^([a-zA-Z])?1\.0\.0.* ]]; then
+            release_notes="## Initial Release\nThis is the first official release of the project!\n\n## What's Included\n${notes}"
+            prerelease=false
+          else
+            release_notes="## What's Changed\n${notes}"
+            prerelease=false
+          fi
+          echo "prerelease=${prerelease}" >> $GITHUB_OUTPUT
+
+          # Conditionally append full changelog link if a previous tag exists
+          if [ -n "${{ env.previous_tag }}" ]; then
+            release_notes="${release_notes}\n\n**Full Changelog**: ${repo_url}/compare/${{ env.previous_tag }}...${{ env.version }}"
+          fi
 
           # Write the release notes to the GITHUB_ENV file
           echo "body<<EOF" >> $GITHUB_ENV
@@ -87,6 +114,6 @@ jobs:
           release_name: ${{ env.version }}
           body: ${{ env.body }}
           draft: false
-          prerelease: false
+          prerelease: ${{ steps.generate_notes.outputs.prerelease }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
